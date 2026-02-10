@@ -50,13 +50,19 @@ jobs:
           shasum -a 256 theme-manager_${{ steps.version.outputs.version }}_${{ matrix.target }}.tar.gz \
             > theme-manager_${{ steps.version.outputs.version }}_${{ matrix.target }}.tar.gz.sha256
 
+      - name: Extract release notes
+        id: notes
+        run: |
+          awk "/## \\[${{ steps.version.outputs.version }}\\]/,/^## \\[/" CHANGELOG.md \
+            | sed '1d;$d' > release-notes.txt
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_name }}
           name: ${{ github.ref_name }}
+          body_path: release-notes.txt
           files: |
-            dist/theme-manager_${{ steps.version.outputs.version }}_darwin_arm64.tar.gz
-            dist/theme-manager_${{ steps.version.outputs.version }}_darwin_arm64.tar.gz.sha256
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            dist/theme-manager_${{ steps.version.outputs.version }}_${{ matrix.target }}.tar.gz
+            dist/theme-manager_${{ steps.version.outputs.version }}_${{ matrix.target }}.tar.gz.sha256
+
