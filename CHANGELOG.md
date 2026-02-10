@@ -78,7 +78,7 @@ These constraints are deliberate and define the scope of the tool.
 
 - `apply/os.sh` (replaced by macOS-specific `apply/macos.sh`).
 
-## Unreleased
+## [0.3.0] - 2026-02-10
 
 ### Added
 
@@ -100,4 +100,8 @@ These constraints are deliberate and define the scope of the tool.
 - Additional surface scripts (explicit, not inferred)
 - Cross-platform OS support
 - Tests for idempotency and failure modes
+
+
+
+## Unreleased
 
