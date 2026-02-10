@@ -64,6 +64,9 @@ These constraints are deliberate and define the scope of the tool.
 
 - `theme-manager doctor`: check for common issues (dependencies, directories, apply scripts, state).
 - `theme-manager version`: show version information.
+- `theme-manager apply --dry-run <theme>`: show resolved theme and which apply scripts would run, without making changes.
+- Theme validation: themes must have `name`; `macos.appearance` (when present) must be `dark` or `light`. Invalid themes fail before any apply scripts run.
+- Theme schema: `schemas/theme.schema.json` defines the canonical theme structure (JSON Schema).
 - macOS appearance surface: `apply/macos.sh` sets system dark/light mode from theme JSON (`macos.appearance`).
 - Theme definitions: `themes/dark/theme.json` and `themes/light/theme.json` now include `macos.appearance` (dark/light).
 
@@ -77,8 +80,8 @@ These constraints are deliberate and define the scope of the tool.
 
 ### Planned (not guaranteed)
 
-- Theme JSON schema validation
-- Dry-run / explain-diff mode
+- Full JSON Schema validation (e.g. via `ajv` or similar) against `schemas/theme.schema.json`
+- Explain-diff mode
 - Additional surface scripts (explicit, not inferred)
 - Cross-platform OS support
 - Tests for idempotency and failure modes

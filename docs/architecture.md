@@ -24,18 +24,20 @@ Those concerns belong to external orchestration tools (e.g. `mise`, dotfiles).
 ## High-Level Flow
 
 ```
-theme-manager apply <theme>
+theme-manager apply [--dry-run] <theme>
 ↓
 resolve theme definition
 ↓
-validate against schema
+validate (required name; macos.appearance enum when present)
+↓
+if --dry-run: print resolved theme and script list, exit
 ↓
 invoke surface apply scripts
 ↓
 exit
 ```
 
-Each step is explicit and observable.
+Each step is explicit and observable. With `--dry-run`, no apply scripts run and no state is written.
 
 ## Key Architectural Decisions
 
@@ -125,6 +127,7 @@ These boundaries are intentional and enforced.
 
 ```
 themes/       → declarative theme definitions
+schemas/      → theme JSON schema (canonical structure)
 apply/        → surface-specific application logic
 bin/          → CLI entry point
 config/       → tool-level defaults

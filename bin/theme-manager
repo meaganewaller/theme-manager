@@ -8,6 +8,7 @@ VERSION="0.1.0"
 # ------------------------------------------------------------------------------
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(dirname "$SCRIPT_DIR")"
+DRY_RUN=false
 
 THEMES_DIR="$ROOT_DIR/themes"
 APPLY_DIR="$ROOT_DIR/apply"
@@ -109,18 +110,19 @@ cmd_version() {
   echo "theme-manager v$VERSION"
 }
 
-
 resolve_theme() {
   local theme="$1"
   local theme_file="$THEMES_DIR/$theme/theme.json"
 
   [[ -f "$theme_file" ]] || die "theme not found: $theme"
 
-  # Validate JSON
   jq empty "$theme_file" || die "invalid JSON in theme: $theme"
+
+  validate_theme "$theme_file"
 
   cat "$theme_file"
 }
+
 
 cmd_explain() {
   local theme="${1:-}"
@@ -130,10 +132,21 @@ cmd_explain() {
 }
 
 cmd_apply() {
-  local theme="${1:-}"
-  [[ -n "$theme" ]] || die "theme name required"
+  local theme=""
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --dry-run)
+        DRY_RUN=true
+        shift
+        ;;
+      *)
+        theme="$1"
+        shift
+        ;;
+    esac
+  done
 
-  echo "→ Applying theme: $theme"
+  [[ -n "$theme" ]] || die "theme name required"
 
   local tmp
   tmp="$(mktemp)"
@@ -141,7 +154,23 @@ cmd_apply() {
 
   resolve_theme "$theme" > "$tmp"
 
-  # Run apply scripts
+  if [[ "$DRY_RUN" == true ]]; then
+    echo "→ Dry run: theme '$theme'"
+    echo
+    echo "Resolved theme:"
+    jq . "$tmp"
+    echo
+    echo "Apply scripts that would run:"
+    for script in "$APPLY_DIR"/*.sh; do
+      [[ -x "$script" ]] && echo " - $(basename "$script")"
+    done
+    echo
+    echo "✓ Dry run complete (no changes made)"
+    return 0
+  fi
+
+  echo "→ Applying theme: $theme"
+
   for script in "$APPLY_DIR"/*.sh; do
     [[ -x "$script" ]] || continue
     echo "→ Running $(basename "$script")"
@@ -151,6 +180,24 @@ cmd_apply() {
   echo "$theme" > "$STATE_FILE"
   echo "✓ Theme applied"
 }
+
+
+validate_theme() {
+  local file="$1"
+
+  # basic sanity
+  jq -e '.name' "$file" >/dev/null \
+    || die "theme missing required field: name"
+
+  # enum validation (explicit > clever)
+  local appearance
+  appearance="$(jq -r '.macos.appearance // empty' "$file")"
+
+  if [[ -n "$appearance" && "$appearance" != "dark" && "$appearance" != "light" ]]; then
+    die "invalid macos.appearance: $appearance (must be dark or light)"
+  fi
+}
+
 
 # ------------------------------------------------------------------------------
 # Entry point

@@ -38,6 +38,12 @@ Apply a theme:
 theme-manager apply dark
 ```
 
+Preview what would happen without making changes (dry run):
+
+```bash
+theme-manager apply --dry-run dark
+```
+
 Show current theme:
 
 ```bash
@@ -67,15 +73,12 @@ theme-manager version
 Theme Manager reads configuration from:
 
 ```
-~/.config/theme-manager`
+~/.config/theme-manager
 ```
 
 This includes:
-- theme definitions
-- default settings
-- per-surface application scripts
-
-Dotfiles are responsible for selecting which theme to apply (e.g., via `THEME_PROFILE`)
+- current theme state
+- (theme definitions and apply scripts live in the installation directory)
 
 Dotfiles are responsible for selecting which theme to apply (e.g., via `THEME_PROFILE`).
 
@@ -87,7 +90,7 @@ Themes live in:
 themes/<theme-name>/theme.json
 ```
 
-Themes are declarative and may define values for multiple surfaces.
+Themes are declarative and may define values for multiple surfaces. Each theme must include a `name` field. The canonical structure is defined in `schemas/theme.schema.json`. Theme Manager validates themes before applying (e.g. required `name`, and if `macos.appearance` is set it must be `dark` or `light`).
 
 Example:
 
@@ -98,9 +101,9 @@ Example:
     "background": "#0f172a",
     "foreground": "#e5e7eb"
   },
-  "git": {
-    "pager": "delta"
-  }
+  "editor": { "theme": "Catppuccin-Mocha" },
+  "git": { "delta": { "features": "side-by-side" } },
+  "macos": { "appearance": "dark" }
 }
 ```
 
