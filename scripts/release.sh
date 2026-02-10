@@ -9,6 +9,9 @@ fi
 
 VERSION="$1"
 TAG="v$VERSION"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT_DIR="$(dirname "$SCRIPT_DIR")"
+CHANGELOG="$ROOT_DIR/CHANGELOG.md"
 
 git diff --quiet || {
   echo "Working tree not clean. Commit or stash first."
@@ -22,10 +25,21 @@ if git rev-parse "$TAG" >/dev/null 2>&1; then
   exit 1
 fi
 
+# Update changelog: move Unreleased to new version, add blank Unreleased
+RELEASE_DATE=$(date +%Y-%m-%d)
+echo "→ Updating CHANGELOG for $TAG ($RELEASE_DATE)"
+sed -i.bak "1,/^## Unreleased$/s/^## Unreleased$/## [$VERSION] - $RELEASE_DATE/" "$CHANGELOG"
+rm -f "$CHANGELOG.bak"
+printf '\n\n## Unreleased\n\n' >> "$CHANGELOG"
+
+git add "$CHANGELOG"
+git commit -m "Changelog for $TAG"
+
 echo "→ Tagging $TAG"
 git tag -a "$TAG" -m "$TAG"
 
-echo "→ Pushing tag"
+echo "→ Pushing branch and tag"
+git push origin HEAD
 git push origin "$TAG"
 
 echo "✓ Release $TAG triggered"

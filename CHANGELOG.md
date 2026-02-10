@@ -58,7 +58,7 @@ Silent changes are considered bugs.
 
 These constraints are deliberate and define the scope of the tool.
 
-## Unreleased
+## [0.2.0] - 2025-02-10
 
 ### Added
 
@@ -77,6 +77,16 @@ These constraints are deliberate and define the scope of the tool.
 ### Removed
 
 - `apply/os.sh` (replaced by macOS-specific `apply/macos.sh`).
+
+## Unreleased
+
+### Added
+
+### Changed
+
+### Removed
+
+### Fixed
 
 ### Planned (not guaranteed)
 
