@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  schema-validation:
+    name: Validate theme schema
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install check-jsonschema
+        run: pip install check-jsonschema
+
+      - name: Validate themes against schema
+        run: |
+          check-jsonschema \
+            --schemafile schemas/theme.schema.json \
+            themes/*/theme.json
+
+  schema-docs:
+    name: Schema docs up to date
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Generate schema docs
+        run: scripts/generate-schema-docs.sh
+
+      - name: Check for changes
+        run: |
+          git diff --exit-code docs/theme-schema.md || {
+            echo "::error::docs/theme-schema.md is out of date. Run: scripts/generate-schema-docs.sh"
+            exit 1
+          }

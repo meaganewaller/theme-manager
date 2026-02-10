@@ -24,12 +24,13 @@ Those concerns belong to external orchestration tools (e.g. `mise`, dotfiles).
 ## High-Level Flow
 
 ```
-theme-manager apply [--dry-run] <theme>
+theme-manager apply [--dry-run | --diff] <theme>
 ↓
 resolve theme definition
 ↓
-validate (required name; macos.appearance enum when present)
+validate (required name; macos.appearance enum when present; full schema in CI)
 ↓
+if --diff: show JSON diff (current theme → target), exit
 if --dry-run: print resolved theme and script list, exit
 ↓
 invoke surface apply scripts
@@ -37,7 +38,7 @@ invoke surface apply scripts
 exit
 ```
 
-Each step is explicit and observable. With `--dry-run`, no apply scripts run and no state is written.
+Each step is explicit and observable. With `--dry-run`, no apply scripts run and no state is written. With `--diff`, a unified diff of the resolved theme JSON (current vs target) is shown and no apply scripts run.
 
 ## Key Architectural Decisions
 
@@ -130,11 +131,12 @@ themes/       → declarative theme definitions
 schemas/      → theme JSON schema (canonical structure)
 apply/        → surface-specific application logic
 bin/          → CLI entry point
+scripts/      → schema doc generation and release helpers
 config/       → tool-level defaults
-docs/         → design documentation
+docs/         → design documentation (including auto-generated theme-schema.md)
 ```
 
-Each directory has a single responsibility.
+Each directory has a single responsibility. CI (`.github/workflows/ci.yml`) validates all theme JSON files against the schema and ensures `docs/theme-schema.md` is up to date.
 
 ## Extending Theme Manager
 
@@ -183,13 +185,11 @@ This architecture prioritizes trust, clarity, and long-term maintainability.
 
 Potential future extensions (explicitly out of scope for v0):
 
-- Dry-run mode
-- Theme diffing
 - Per-surface enable/disable flags
 - Cross-platform abstractions
 - Plugin system for surfaces
 
-These should only be added if they preserve the core principles above.
+Dry-run and theme diffing (`apply --dry-run`, `apply --diff`) are implemented. These should only be extended if they preserve the core principles above.
 
 ## Summary
 

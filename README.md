@@ -44,6 +44,12 @@ Preview what would happen without making changes (dry run):
 theme-manager apply --dry-run dark
 ```
 
+Show a diff of the resolved theme JSON vs the currently applied theme (no changes made):
+
+```bash
+theme-manager apply --diff dark
+```
+
 Show current theme:
 
 ```bash
@@ -90,7 +96,7 @@ Themes live in:
 themes/<theme-name>/theme.json
 ```
 
-Themes are declarative and may define values for multiple surfaces. Each theme must include a `name` field. The canonical structure is defined in `schemas/theme.schema.json`. Theme Manager validates themes before applying (e.g. required `name`, and if `macos.appearance` is set it must be `dark` or `light`).
+Themes are declarative and may define values for multiple surfaces. Each theme must include a `name` field. The canonical structure is defined in `schemas/theme.schema.json`. Schema documentation is auto-generated in `docs/theme-schema.md` (run `scripts/generate-schema-docs.sh` to regenerate). Theme Manager validates themes before applying; CI validates all `themes/*/theme.json` files against the schema.
 
 Example:
 

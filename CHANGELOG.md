@@ -82,6 +82,12 @@ These constraints are deliberate and define the scope of the tool.
 
 ### Added
 
+- `theme-manager apply --diff <theme>`: show a unified diff of the resolved theme JSON (current theme → target theme) without applying. If no theme is currently applied, prints the resolved target theme.
+- Auto-generated schema documentation: `scripts/generate-schema-docs.sh` generates `docs/theme-schema.md` from `schemas/theme.schema.json`. Regenerate after schema changes.
+- CI workflow (`.github/workflows/ci.yml`): runs on push and pull_request to `main`.
+  - **Schema validation**: validates all `themes/*/theme.json` files against `schemas/theme.schema.json` using `check-jsonschema`.
+  - **Schema docs**: ensures `docs/theme-schema.md` is up to date; fails if the generated doc differs from the committed file.
+
 ### Changed
 
 ### Removed
@@ -90,7 +96,6 @@ These constraints are deliberate and define the scope of the tool.
 
 ### Planned (not guaranteed)
 
-- Full JSON Schema validation (e.g. via `ajv` or similar) against `schemas/theme.schema.json`
 - Explain-diff mode
 - Additional surface scripts (explicit, not inferred)
 - Cross-platform OS support

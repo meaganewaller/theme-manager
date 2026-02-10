@@ -8,12 +8,12 @@ VERSION="0.1.0"
 # ------------------------------------------------------------------------------
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(dirname "$SCRIPT_DIR")"
-DRY_RUN=false
-
 THEMES_DIR="$ROOT_DIR/themes"
 APPLY_DIR="$ROOT_DIR/apply"
 CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/theme-manager"
 STATE_FILE="$CONFIG_DIR/current-theme"
+DRY_RUN=false
+DIFF=false
 
 # ------------------------------------------------------------------------------
 # Helpers
@@ -37,7 +37,7 @@ Usage:
   theme-manager current
   theme-manager doctor
   theme-manager version
-  theme-manager apply <theme>
+  theme-manager apply [--dry-run | --diff] <theme>
   theme-manager explain <theme>
 
 Commands:
@@ -45,7 +45,7 @@ Commands:
   current     Show currently applied theme
   doctor      Check for common issues
   version     Show version information
-  apply       Apply a theme
+  apply       Apply a theme (--dry-run: show plan only; --diff: show JSON diff vs current)
   explain     Print the resolved theme JSON
 
 EOF
@@ -139,6 +139,10 @@ cmd_apply() {
         DRY_RUN=true
         shift
         ;;
+      --diff)
+        DIFF=true
+        shift
+        ;;
       *)
         theme="$1"
         shift
@@ -153,6 +157,35 @@ cmd_apply() {
   trap 'rm -f "$tmp"' EXIT
 
   resolve_theme "$theme" > "$tmp"
+
+  if [[ "$DIFF" == true ]]; then
+    local current_name
+    current_name=""
+    [[ -f "$STATE_FILE" ]] && current_name="$(cat "$STATE_FILE")"
+    if [[ -z "$current_name" ]]; then
+      echo "→ No current theme to compare."
+      echo
+      echo "Resolved theme for '$theme':"
+      jq . "$tmp"
+      return 0
+    fi
+    local current_tmp
+    current_tmp="$(mktemp)"
+    trap 'rm -f "$tmp" "$current_tmp"' EXIT
+    if ! resolve_theme "$current_name" > "$current_tmp" 2>/dev/null; then
+      echo "→ Current theme '$current_name' could not be resolved (theme missing or invalid)."
+      echo
+      echo "Resolved theme for '$theme':"
+      jq . "$tmp"
+      rm -f "$current_tmp"
+      return 0
+    fi
+    echo "→ Diff: current ($current_name) → $theme"
+    echo
+    diff -u <(jq -S . "$current_tmp") <(jq -S . "$tmp") || true
+    rm -f "$current_tmp"
+    return 0
+  fi
 
   if [[ "$DRY_RUN" == true ]]; then
     echo "→ Dry run: theme '$theme'"
