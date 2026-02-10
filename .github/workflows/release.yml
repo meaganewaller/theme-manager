@@ -1,0 +1,47 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build and publish release
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Extract version
+        id: version
+        runs: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Prepare release directory
+        run: |
+          mkdir -p dist/theme-manager-${{ steps.version.outputs.version }}/bin
+          cp bin/theme-manager dist/theme-manager-${{ steps.version.outputs.version }}/bin/
+          chmod +x dist/theme-manager-${{ steps.version.outputs.version }}/bin/theme-manager
+
+      - name: Create tarball (macOS arm64)
+        run: |
+          cd dist
+          tar -czf \
+            theme-manager_${{ steps.version.outputs.version }}_darwin_arm64.tar.gz \
+            theme-manager-${{ steps.version.outputs.version }}
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: ${{ github.ref_name }}
+          files: |
+            dist/theme-manager_${{ steps.version.outputs.version }}_darwin_arm64.tar.gz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
