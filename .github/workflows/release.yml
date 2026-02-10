@@ -19,7 +19,7 @@ jobs:
 
       - name: Extract version
         id: version
-        runs: |
+        run: |
           VERSION="${GITHUB_REF_NAME#v}"
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
