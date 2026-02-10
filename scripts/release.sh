@@ -12,6 +12,7 @@ TAG="v$VERSION"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(dirname "$SCRIPT_DIR")"
 CHANGELOG="$ROOT_DIR/CHANGELOG.md"
+BIN_SCRIPT="$ROOT_DIR/bin/theme-manager"
 
 git diff --quiet || {
   echo "Working tree not clean. Commit or stash first."
@@ -25,6 +26,11 @@ if git rev-parse "$TAG" >/dev/null 2>&1; then
   exit 1
 fi
 
+# Update VERSION in bin/theme-manager
+echo "→ Updating VERSION to $VERSION in bin/theme-manager"
+sed -i.bak "s/^VERSION=\".*\"$/VERSION=\"$VERSION\"/" "$BIN_SCRIPT"
+rm -f "$BIN_SCRIPT.bak"
+
 # Update changelog: move Unreleased to new version, add blank Unreleased
 RELEASE_DATE=$(date +%Y-%m-%d)
 echo "→ Updating CHANGELOG for $TAG ($RELEASE_DATE)"
@@ -32,8 +38,8 @@ sed -i.bak "1,/^## Unreleased$/s/^## Unreleased$/## [$VERSION] - $RELEASE_DATE/"
 rm -f "$CHANGELOG.bak"
 printf '\n\n## Unreleased\n\n' >> "$CHANGELOG"
 
-git add "$CHANGELOG"
-git commit -m "Changelog for $TAG"
+git add "$BIN_SCRIPT" "$CHANGELOG"
+git commit -m "Release $TAG"
 
 echo "→ Tagging $TAG"
 git tag -a "$TAG" -m "$TAG"
