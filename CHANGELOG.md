@@ -103,5 +103,9 @@ These constraints are deliberate and define the scope of the tool.
 
 
 
+## [0.3.1] - 2026-02-10
+
+
+
 ## Unreleased
 
