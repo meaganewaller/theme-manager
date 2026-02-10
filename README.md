@@ -44,10 +44,22 @@ Show current theme:
 theme-manager current
 ```
 
-List availabl themes:
+List available themes:
 
 ```bash
 theme-manager list
+```
+
+Check for common issues (dependencies, directories, apply scripts, state):
+
+```bash
+theme-manager doctor
+```
+
+Show version information:
+
+```bash
+theme-manager version
 ```
 
 ## Configuration

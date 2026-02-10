@@ -62,6 +62,8 @@ These constraints are deliberate and define the scope of the tool.
 
 ### Added
 
+- `theme-manager doctor`: check for common issues (dependencies, directories, apply scripts, state).
+- `theme-manager version`: show version information.
 - macOS appearance surface: `apply/macos.sh` sets system dark/light mode from theme JSON (`macos.appearance`).
 - Theme definitions: `themes/dark/theme.json` and `themes/light/theme.json` now include `macos.appearance` (dark/light).
 
