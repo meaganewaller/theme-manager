@@ -60,7 +60,20 @@ These constraints are deliberate and define the scope of the tool.
 
 ## Unreleased
 
-Planned (not guaranteed):
+### Added
+
+- macOS appearance surface: `apply/macos.sh` sets system dark/light mode from theme JSON (`macos.appearance`).
+- Theme definitions: `themes/dark/theme.json` and `themes/light/theme.json` now include `macos.appearance` (dark/light).
+
+### Changed
+
+- Release workflow (`.github/workflows/release.yml`): build matrix for darwin_arm64 and linux_amd64; release artifacts include darwin_arm64 tarball and checksum.
+
+### Removed
+
+- `apply/os.sh` (replaced by macOS-specific `apply/macos.sh`).
+
+### Planned (not guaranteed)
 
 - Theme JSON schema validation
 - Dry-run / explain-diff mode

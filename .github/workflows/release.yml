@@ -11,7 +11,15 @@ permissions:
 jobs:
   release:
     name: Build and publish release
-    runs-on: macos-latest
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        include:
+          - os: macos-latest
+            target: darwin_arm64
+          - os: ubuntu-latest
+            target: linux_amd64
 
     steps:
       - name: Checkout
@@ -29,18 +37,18 @@ jobs:
           cp bin/theme-manager dist/theme-manager-${{ steps.version.outputs.version }}/bin/
           chmod +x dist/theme-manager-${{ steps.version.outputs.version }}/bin/theme-manager
 
-      - name: Create tarball (macOS arm64)
+      - name: Create tarball
         run: |
           cd dist
           tar -czf \
-            theme-manager_${{ steps.version.outputs.version }}_darwin_arm64.tar.gz \
+            theme-manager_${{ steps.version.outputs.version }}_${{ matrix.target }}.tar.gz \
             theme-manager-${{ steps.version.outputs.version }}
 
       - name: Generate checksums
         run: |
           cd dist
-          shasum -a 256 theme-manager_${{ steps.version.outputs.version }}_darwin_arm64.tar.gz \
-            > theme-manager_${{ steps.version.outputs.version }}_darwin_arm64.tar.gz.sha256
+          shasum -a 256 theme-manager_${{ steps.version.outputs.version }}_${{ matrix.target }}.tar.gz \
+            > theme-manager_${{ steps.version.outputs.version }}_${{ matrix.target }}.tar.gz.sha256
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2

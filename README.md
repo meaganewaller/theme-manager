@@ -104,7 +104,7 @@ Examples:
 - `terminal.sh`
 - `git.sh`
 - `editor.sh`
-- `os.sh`
+- `macos.sh`
 
 These scripts:
 

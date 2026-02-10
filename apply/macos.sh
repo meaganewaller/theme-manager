@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-jq -e '.os.appearance' "$THEME_JSON" >/dev/null 2>&1 || exit 0
+jq -e '.macos.appearance' "$THEME_JSON" >/dev/null 2>&1 || exit 0
 
-APPEARANCE=$(jq -r '.os.appearance' "$THEME_JSON")
+APPEARANCE=$(jq -r '.macos.appearance' "$THEME_JSON")
 
 case "$APPEARANCE" in
   dark)

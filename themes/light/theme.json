@@ -12,7 +12,7 @@
       "features": "side-by-side"
     }
   },
-  "os": {
+  "macos": {
     "appearance": "light"
   }
 }
