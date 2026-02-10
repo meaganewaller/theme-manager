@@ -36,6 +36,12 @@ jobs:
             theme-manager_${{ steps.version.outputs.version }}_darwin_arm64.tar.gz \
             theme-manager-${{ steps.version.outputs.version }}
 
+      - name: Generate checksums
+        run: |
+          cd dist
+          shasum -a 256 theme-manager_${{ steps.version.outputs.version }}_darwin_arm64.tar.gz \
+            > theme-manager_${{ steps.version.outputs.version }}_darwin_arm64.tar.gz.sha256
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
@@ -43,5 +49,6 @@ jobs:
           name: ${{ github.ref_name }}
           files: |
             dist/theme-manager_${{ steps.version.outputs.version }}_darwin_arm64.tar.gz
+            dist/theme-manager_${{ steps.version.outputs.version }}_darwin_arm64.tar.gz.sha256
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
