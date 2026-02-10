@@ -1,0 +1,57 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "Theme Manager Theme",
+    "type": "object",
+    "required": ["name"],
+    "additionalProperties": false,
+  
+    "properties": {
+      "name": {
+        "type": "string",
+        "minLength": 1
+      },
+  
+      "terminal": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "background": { "type": "string" },
+          "foreground": { "type": "string" }
+        }
+      },
+  
+      "editor": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "theme": { "type": "string" }
+        }
+      },
+  
+      "git": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "delta": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "features": { "type": "string" }
+            }
+          }
+        }
+      },
+  
+      "macos": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "appearance": {
+            "type": "string",
+            "enum": ["dark", "light"]
+          }
+        }
+      }
+    }
+  }
+  
