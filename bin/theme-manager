@@ -1,0 +1,141 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+VERSION="0.1.0"
+
+
+# ------------------------------------------------------------------------------
+# Paths
+# ------------------------------------------------------------------------------
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT_DIR="$(dirname "$SCRIPT_DIR")"
+
+THEMES_DIR="$ROOT_DIR/themes"
+APPLY_DIR="$ROOT_DIR/apply"
+CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/theme-manager"
+STATE_FILE="$CONFIG_DIR/current-theme"
+
+# ------------------------------------------------------------------------------
+# Helpers
+# ------------------------------------------------------------------------------
+
+die() {
+    echo "theme-manager: $*"
+    exit 1
+}
+
+require() {
+  command -v "$1" >/dev/null 2>&1 || die "missing required dependency: $1"
+}
+
+usage() {
+  cat <<EOF
+theme-manager v$VERSION
+
+Usage:
+  theme-manager list
+  theme-manager current
+  theme-manager apply <theme>
+  theme-manager explain <theme>
+
+Commands:
+  list        List available themes
+  current     Show currently applied theme
+  apply       Apply a theme
+  explain     Print the resolved theme JSON
+
+EOF
+}
+
+# ------------------------------------------------------------------------------
+# Preconditions
+# ------------------------------------------------------------------------------
+
+require jq
+
+mkdir -p "$CONFIG_DIR"
+
+# ------------------------------------------------------------------------------
+# Commands
+# ------------------------------------------------------------------------------
+
+cmd_list() {
+  ls -1 "$THEMES_DIR" | sed 's/^/ - /'
+}
+
+cmd_current() {
+  if [[ -f "$STATE_FILE" ]]; then
+    cat "$STATE_FILE"
+  else
+    echo "(none)"
+  fi
+}
+
+resolve_theme() {
+  local theme="$1"
+  local theme_file="$THEMES_DIR/$theme/theme.json"
+
+  [[ -f "$theme_file" ]] || die "theme not found: $theme"
+
+  # Validate JSON
+  jq empty "$theme_file" || die "invalid JSON in theme: $theme"
+
+  cat "$theme_file"
+}
+
+cmd_explain() {
+  local theme="${1:-}"
+  [[ -n "$theme" ]] || die "theme name required"
+
+  resolve_theme "$theme" | jq .
+}
+
+cmd_apply() {
+  local theme="${1:-}"
+  [[ -n "$theme" ]] || die "theme name required"
+
+  echo "→ Applying theme: $theme"
+
+  local tmp
+  tmp="$(mktemp)"
+  trap 'rm -f "$tmp"' EXIT
+
+  resolve_theme "$theme" > "$tmp"
+
+  # Run apply scripts
+  for script in "$APPLY_DIR"/*.sh; do
+    [[ -x "$script" ]] || continue
+    echo "→ Running $(basename "$script")"
+    THEME_JSON="$tmp" "$script"
+  done
+
+  echo "$theme" > "$STATE_FILE"
+  echo "✓ Theme applied"
+}
+
+# ------------------------------------------------------------------------------
+# Entry point
+# ------------------------------------------------------------------------------
+
+case "${1:-}" in
+  list)
+    cmd_list
+    ;;
+  current)
+    cmd_current
+    ;;
+  apply)
+    shift
+    cmd_apply "$@"
+    ;;
+  explain)
+    shift
+    cmd_explain "$@"
+    ;;
+  -h|--help|help|"")
+    usage
+    ;;
+  *)
+    die "unknown command: $1"
+    ;;
+esac
